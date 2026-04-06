@@ -354,3 +354,32 @@ El proyecto todavía está en exploración funcional y seguirán apareciendo cas
 
 ### Regla
 Las fases pueden refinarse, dividirse o reordenarse siempre que se mantenga el enfoque de entregables pequeños y útiles.
+
+## Decisión de Home móvil v1
+
+Se adopta como base el Home móvil oscuro con:
+- buscador superior
+- navegación principal en grid 2x2
+- bloque de próximo repertorio
+- géneros populares
+- recientes
+- botón flotante
+- barra inferior de navegación
+
+El bloque de próximo repertorio tendrá:
+- versión compacta por defecto
+- posibilidad de expandirse para mostrar más detalle
+
+## Buscador móvil v1
+
+Se adopta una versión más enfocada y simplificada del buscador, priorizando búsqueda rápida y acceso inmediato a resultados.
+
+Elementos principales:
+- barra de búsqueda protagonista
+- chips de apoyo
+- búsquedas recientes
+- resultados rápidos en tarjetas compactas
+- favorito visible por resultado
+- barra inferior consistente con el resto de la app
+
+La intención es que la pantalla funcione primero como herramienta de búsqueda, dejando la exploración avanzada para fases posteriores.

@@ -43,8 +43,9 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 6. Vista básica de canto
 7. Modificar tamaño de letra
 8. Soporte offline desde el inicio
-9. Test
-10. Entregable
+9. Agregar favoritos
+10. Test
+11. Entregable
 
 ---
 

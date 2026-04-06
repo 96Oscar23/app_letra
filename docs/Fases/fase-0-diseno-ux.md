@@ -24,9 +24,11 @@ En esta fase se definirán los siguientes elementos:
 - paleta de colores
 - tipografías
 - componentes base de interfaz
+- layout general por dispositivo
 - pantallas principales
 - flujos principales
 - lineamientos generales de experiencia de usuario
+- mockups iniciales de pantallas clave
 - puntos pendientes por validar antes de desarrollo
 
 ---
@@ -104,7 +106,6 @@ La aplicación utilizará una paleta basada en azules, neutros claros y neutros 
 ## Tokens de color
 
 ### Brand
-
 - `primary`: `#00487C`
 - `primaryPressed`: `#003A64`
 - `primaryLight`: `#027BCE`
@@ -112,7 +113,6 @@ La aplicación utilizará una paleta basada en azules, neutros claros y neutros 
 - `accentDeep`: `#3E6680`
 
 ### Light Theme
-
 - `background`: `#F8FAFC`
 - `surface`: `#FFFFFF`
 - `surfaceAlt`: `#F1F5F9`
@@ -126,7 +126,6 @@ La aplicación utilizará una paleta basada en azules, neutros claros y neutros 
 - `disabled`: `#CBD5E1`
 
 ### Dark Theme
-
 - `backgroundDark`: `#0B1220`
 - `surfaceDark`: `#111827`
 - `surfaceAltDark`: `#1E293B`
@@ -163,7 +162,6 @@ La aplicación utilizará una paleta basada en azules, neutros claros y neutros 
 - `infoDark`: `#0C4A6E`
 
 ### Modo en vivo
-
 - `liveBackground`: `#050816`
 - `liveSurface`: `#0B1220`
 - `liveTextPrimary`: `#FFFFFF`
@@ -213,7 +211,6 @@ Usar modo claro con contraste fuerte:
 Se utilizará la tipografía por defecto del sistema para mantener compatibilidad, buena legibilidad y una apariencia natural en cada plataforma.
 
 ### Reglas iniciales
-
 - respetar el escalado de texto configurado por el usuario
 - permitir aumentar el tamaño de letra dentro de la app
 - definir límites mínimos y máximos para evitar tamaños extremos
@@ -221,41 +218,47 @@ Se utilizará la tipografía por defecto del sistema para mantener compatibilida
 - priorizar legibilidad sobre estética decorativa
 
 ### Consideración importante
-
 La letra del canto debe poder crecer más que el resto de la interfaz, pero con límites razonables para no romper la experiencia visual.
 
 ---
 
 ## Definir componentes base de interfaz
 
-Se definen los componentes principales para construir una base consistente.
+Se definen los componentes principales de la aplicación para construir una base consistente.
 
 ### Navegación principal
 
 #### Móvil
-- barra inferior de navegación
-- contenido principal
-- botón de acción principal opcional
+Se considera como navegación principal una barra inferior de menú, por ser un patrón claro y familiar para la mayoría de usuarios.
+
+Uso esperado:
+- Home
+- Cantos
+- Repertorios
+- Buscar
+- Configuración
 
 #### Tablet
 **Pendiente por validar**
-- barra lateral
-- barra superior
-- combinación de navegación principal y panel contextual
+
+Opciones a explorar:
+- barra horizontal
+- barra lateral con iconos
+- combinación de header con panel lateral contextual
+
+Por el momento, la idea más estable es mantener una navegación clara y visible, sin sobrecargar la pantalla.
 
 ### Botón de acción principal
-
-Botón con icono de “más”.
+Botón circular con icono de “más”.
 
 Funciones posibles:
 - agregar canto
 - agregar repertorio
 - mostrar acciones rápidas
 
-Debe ser visible, útil y no estorbar la lectura del contenido.
+Debe ser un acceso rápido y visible, pero sin estorbar la lectura del contenido.
 
 ### Componentes base a considerar
-
 - header principal
 - barra inferior de navegación
 - botón de acción principal
@@ -272,56 +275,305 @@ Debe ser visible, útil y no estorbar la lectura del contenido.
 
 ---
 
-## Pantallas principales iniciales
+## Layout por dispositivo
 
-Pantallas que deben contemplarse desde esta fase:
+### Móvil
+En móvil, la interfaz debe priorizar una sola sección principal.
 
-- Home
-- Lista de cantos
-- Detalle de canto
-- Crear / editar canto
-- Buscar cantos
-- Repertorios
-- Detalle de repertorio
-- Configuración
-- Vista de modo en vivo
+Estructura base:
+- header
+- contenido principal
+- barra inferior de navegación
+- botón de acción principal opcional
+
+### Tablet
+En tablet, se contempla una estructura más amplia y flexible.
+
+Distribución conceptual:
+- área de navegación
+- contenido principal
+- panel contextual opcional
+
+**Pendiente por validar:**
+- si conviene barra lateral
+- si conviene panel contextual fijo
+- si conviene una estructura más simple sin múltiples paneles visibles al mismo tiempo
 
 ---
 
-## Flujos a documentar
+## Vista de repertorio
 
-**Pendiente por desarrollar**
+Desde fases tempranas, el repertorio debe poder visualizarse sin necesidad de mostrar la letra completa de cada canto.
 
-### Flujo para usuario común
-- entrar
-- buscar
-- abrir un canto
-- ajustar tamaño de letra
-- consultar repertorio
+### Vista compacta
+Debe mostrar:
+- orden
+- nombre del canto
+- variante si aplica
+- tono base
+- acceso rápido al detalle
 
-### Flujo para agregar canto rápido
-- crear
-- pegar texto
-- guardar
+### Vista detallada
+Debe mostrar más contexto:
+- notas
+- variante
+- información adicional
+- relación con repertorio
 
-### Flujo para repertorios
-- crear repertorio
-- agregar cantos
-- ordenar
-- ver lista compacta
-- abrir detalle
+### Vista de letra
+Se accede solo cuando el usuario lo desea o cuando entra a modo de lectura o modo en vivo.
 
-### Flujo para uso en vivo
-- abrir repertorio
-- navegar entre cantos
-- ocultar elementos secundarios
-- mostrar solo lo necesario
+---
+
+## Reglas de barra inferior o área inferior
+
+En lugar de tratarse como footer tradicional, se manejará como barra inferior de navegación o acciones.
+
+### Reglas
+- visible por defecto en móvil
+- puede ocultarse en modo presentación
+- puede ocultarse en modo en vivo
+- debe permitir recuperar espacio para letras en pantallas pequeñas
+
+Puede ocultarse mediante:
+- botón
+- gesto
+- cambio automático según modo
+
+---
+
+## Pantallas principales
+
+### 1. Home
+**Objetivo:** servir como punto de entrada rápido a las funciones principales.
+
+**Elementos principales:**
+- accesos rápidos
+- recientes o sugeridos
+- botón para agregar canto
+- acceso a repertorios
+- acceso a búsqueda
+- acceso a configuración
+
+---
+
+### 2. Lista de cantos
+**Objetivo:** mostrar todos los cantos guardados localmente.
+
+**Elementos principales:**
+- listado de cantos
+- buscador
+- acceso a crear canto
+- acceso al detalle de cada canto
+
+**Nota:**
+En fases futuras puede incluir filtros, etiquetas o categorías.
+
+---
+
+### 3. Detalle de canto
+**Objetivo:** permitir leer el contenido del canto y consultar su información principal.
+
+**Elementos principales:**
+- título
+- tono base
+- letra
+- botón editar
+- ajuste de tamaño de letra
+- acciones rápidas
+
+---
+
+### 4. Crear canto
+**Objetivo:** permitir capturar un nuevo canto de forma rápida.
+
+**Elementos principales:**
+- título
+- tono base
+- letra
+- botón guardar
+- botón cancelar
+
+---
+
+### 5. Editar canto
+**Objetivo:** modificar la información de un canto existente.
+
+**Elementos principales:**
+- campos precargados
+- edición de título
+- edición de tono
+- edición de letra
+- guardar cambios
+
+---
+
+### 6. Buscar cantos
+**Objetivo:** encontrar un canto de forma rápida por nombre o contenido.
+
+**Elementos principales:**
+- campo de búsqueda
+- resultados
+- acceso al detalle
+- estado vacío sin resultados
+
+---
+
+### 7. Repertorios
+**Objetivo:** mostrar los repertorios disponibles.
+
+**Elementos principales:**
+- lista de repertorios
+- botón agregar repertorio
+- acceso al detalle
+- vista compacta
+
+---
+
+### 8. Detalle de repertorio
+**Objetivo:** consultar los cantos de un repertorio y su orden.
+
+**Elementos principales:**
+- nombre del repertorio
+- lista ordenada de cantos
+- tono base
+- acceso al detalle de canto
+- vista compacta
+- acceso a modo en vivo
+
+---
+
+### 9. Configuración
+**Objetivo:** permitir ajustes básicos de lectura y experiencia.
+
+**Elementos principales:**
+- tamaño de letra
+- tema claro / oscuro
+- opciones visuales
+- configuraciones básicas
+
+---
+
+### 10. Modo en vivo
+**Objetivo:** mostrar la letra o contenido de forma limpia y legible durante uso en escenario o ensayo.
+
+**Elementos principales:**
+- letra en gran tamaño
+- navegación simple
+- mínimo ruido visual
+- opción de ocultar barras o controles
+
+---
+
+## Flujos principales
+
+### Flujo 1 - Usuario común
+**Objetivo:** consultar cantos y repertorios de forma simple.
+
+**Pantallas involucradas:**
+- Home
+- Lista de cantos
+- Detalle de canto
+- Repertorios
+- Detalle de repertorio
+
+**Pasos del usuario:**
+1. abrir la app
+2. entrar a cantos o repertorios
+3. buscar o seleccionar un elemento
+4. abrir el detalle
+5. leer el contenido
+6. ajustar tamaño de letra si es necesario
+
+**Resultado esperado:**
+El usuario puede consultar contenido de forma rápida y clara.
+
+---
+
+### Flujo 2 - Agregar canto rápido
+**Objetivo:** guardar un nuevo canto con pocos pasos.
+
+**Pantallas involucradas:**
+- Home
+- Crear canto
+- Detalle de canto
+
+**Pasos del usuario:**
+1. abrir la app
+2. tocar el botón de agregar
+3. seleccionar crear canto
+4. capturar título
+5. capturar tono base
+6. pegar o escribir la letra
+7. guardar
+8. ver el canto creado
+
+**Resultado esperado:**
+El canto queda guardado localmente y disponible en la lista.
+
+---
+
+### Flujo 3 - Repertorios
+**Objetivo:** organizar cantos dentro de un repertorio.
+
+**Pantallas involucradas:**
+- Repertorios
+- Detalle de repertorio
+- Lista de cantos
+- Detalle de canto
+
+**Pasos del usuario:**
+1. entrar a repertorios
+2. crear o abrir un repertorio
+3. agregar cantos
+4. ordenar los cantos
+5. consultar la vista compacta
+6. abrir un canto si necesita más detalle
+
+**Resultado esperado:**
+El repertorio queda organizado y listo para consulta o uso en vivo.
+
+---
+
+### Flujo 4 - Uso en vivo
+**Objetivo:** consultar contenido de forma clara durante ensayo o presentación.
+
+**Pantallas involucradas:**
+- Repertorios
+- Detalle de repertorio
+- Modo en vivo
+
+**Pasos del usuario:**
+1. abrir un repertorio
+2. seleccionar entrar a modo en vivo
+3. visualizar solo lo necesario
+4. navegar entre cantos
+5. mantener lectura clara y rápida
+
+**Resultado esperado:**
+La app muestra el contenido con legibilidad alta y mínima distracción.
+
+---
+
+## Mockups de pantallas principales
+
+Se deberán crear mockups para:
+- Home
+- Repertorios
+- Configuración
+- Lista de cantos
+- Detalle de canto
+- Crear o editar canto
+- Repertorio en vista compacta
+- Repertorio en vista detallada
+- Modo en vivo
+- Búsqueda
 
 ---
 
 ## Validación de experiencia
 
-Antes de pasar a desarrollo, se debe validar que la experiencia cumpla con lo siguiente:
+Antes de pasar a desarrollo funcional, se debe validar que la experiencia cumpla con lo siguiente:
 
 - sea simple de entender
 - se sienta moderna
@@ -329,6 +581,7 @@ Antes de pasar a desarrollo, se debe validar que la experiencia cumpla con lo si
 - funcione bien en móvil y tablet
 - mantenga legibilidad en distintos escenarios de luz
 - permita acceso rápido a funciones frecuentes
+- se adapte bien a repertorio, detalle de canto y modo en vivo
 
 ---
 
@@ -336,11 +589,12 @@ Antes de pasar a desarrollo, se debe validar que la experiencia cumpla con lo si
 
 Estos puntos todavía no están cerrados y deberán validarse con mockups o pruebas tempranas:
 
-- navegación principal en tablet
+- navegación principal en tablet: horizontal o lateral
+- uso real del panel contextual en tablet
 - comportamiento exacto del botón de acción principal
+- reglas finales para ocultar barra inferior en modo presentación
 - definición final de pantallas prioritarias en tablet
-- mockups de pantallas principales
-- flujos principales detallados
+- detalle visual de Home, Repertorio y Configuración en móvil y tablet
 
 ---
 
@@ -368,6 +622,8 @@ Al finalizar esta fase se espera contar con:
 - paleta de colores definida
 - reglas tipográficas base
 - componentes base identificados
+- layout general por dispositivo
 - pantallas principales listadas
 - flujos principales identificados
+- mockups iniciales de pantallas clave
 - pendientes claramente separados de decisiones ya tomadas
