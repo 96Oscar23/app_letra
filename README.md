@@ -30,6 +30,7 @@ flutter run
     inicia el proyecto
 
 comando para buscar dispostivos
+flutter devices
 
 comando para correr proyecto en un equipo
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:app_letras/screens/home_page.dart';
 
 void main() {
   runApp(const MyApp());
@@ -31,7 +32,8 @@ class MyApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: Color.fromARGB(255, 47, 111, 183)),
         useMaterial3: true,
       ),
-      home: const MyHomePage(title: 'App letras Pagina principal'),
+      // home: const MyHomePage(title: 'App letras Pagina principal'),
+      home: const HomePage()
     );
   }
 }
