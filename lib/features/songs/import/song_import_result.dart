@@ -22,6 +22,7 @@ class SongImportResult {
   final int? sizeBytes;
 
   bool get supportsPreview => source != SongImportSource.pdf;
+  bool get supportsOcr => source != SongImportSource.pdf;
 
   String get sourceLabel => switch (source) {
         SongImportSource.pdf => 'archivo PDF',

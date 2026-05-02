@@ -6,6 +6,7 @@ import '../../repertories/presentation/repertories_page.dart';
 import '../../search/presentation/search_page.dart';
 import '../../settings/presentation/settings_page.dart';
 import '../../songs/domain/song.dart';
+import '../../songs/import/import_processing_screen.dart';
 import '../../songs/import/song_file_picker_service.dart';
 import '../../songs/import/song_image_picker_service.dart';
 import '../../songs/import/song_import_result.dart';
@@ -98,15 +99,17 @@ class _AppShellState extends State<AppShell> {
         );
         break;
       case SongCreationAction.importImage:
-        changed = await _openImportReview(
+        changed = await _openImageImportFlow(
           context,
           loader: _imagePickerService.pickFromGallery,
+          retryActionLabel: 'Seleccionar otra imagen',
         );
         break;
       case SongCreationAction.takePhoto:
-        changed = await _openImportReview(
+        changed = await _openImageImportFlow(
           context,
           loader: _imagePickerService.takePhoto,
+          retryActionLabel: 'Tomar otra foto',
         );
         break;
     }
@@ -151,6 +154,50 @@ class _AppShellState extends State<AppShell> {
         _showMessage(
           context,
           'No se pudo abrir el flujo de importacion. Intenta de nuevo.',
+        );
+      }
+      return false;
+    }
+  }
+
+  Future<bool?> _openImageImportFlow(
+    BuildContext context, {
+    required Future<SongImportResult?> Function() loader,
+    required String retryActionLabel,
+  }) async {
+    final songsController = AppScope.of(context).songsController;
+
+    try {
+      final result = await loader();
+      if (!context.mounted) {
+        return null;
+      }
+
+      if (result == null) {
+        _showMessage(context, 'Seleccion cancelada.');
+        return false;
+      }
+
+      return Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => ImportProcessingScreen(
+            controller: songsController,
+            initialImportResult: result,
+            retryLoader: loader,
+            retryActionLabel: retryActionLabel,
+          ),
+        ),
+      );
+    } on SongImportException catch (error) {
+      if (context.mounted) {
+        _showMessage(context, error.message);
+      }
+      return false;
+    } catch (_) {
+      if (context.mounted) {
+        _showMessage(
+          context,
+          'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
         );
       }
       return false;

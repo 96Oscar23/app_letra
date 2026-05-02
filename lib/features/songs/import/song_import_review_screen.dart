@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import '../../../app/theme/app_colors.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -14,11 +15,15 @@ class SongImportReviewScreen extends StatefulWidget {
     super.key,
     required this.controller,
     required this.importResult,
+    this.initialDraft,
+    this.helperMessage,
     this.referenceStorageService = const SongReferenceStorageService(),
   });
 
   final SongsController controller;
   final SongImportResult importResult;
+  final SongDraft? initialDraft;
+  final String? helperMessage;
   final SongReferenceStorageService referenceStorageService;
 
   @override
@@ -39,12 +44,16 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
   @override
   void initState() {
     super.initState();
-    _titleController =
-        TextEditingController(text: widget.importResult.suggestedTitle);
-    _authorController = TextEditingController();
-    _toneController = TextEditingController();
-    _notesController = TextEditingController();
-    _lyricsController = TextEditingController();
+    final initialDraft = widget.initialDraft ?? const SongDraft();
+    _titleController = TextEditingController(
+      text: initialDraft.title.trim().isNotEmpty
+          ? initialDraft.title
+          : widget.importResult.suggestedTitle,
+    );
+    _authorController = TextEditingController(text: initialDraft.author);
+    _toneController = TextEditingController(text: initialDraft.baseKey);
+    _notesController = TextEditingController(text: initialDraft.notes);
+    _lyricsController = TextEditingController(text: initialDraft.lyrics);
   }
 
   @override
@@ -147,6 +156,28 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
     }
   }
 
+  Future<void> _pasteFromClipboard() async {
+    final data = await Clipboard.getData(Clipboard.kTextPlain);
+    if (!mounted) {
+      return;
+    }
+
+    final text = data?.text?.trim() ?? '';
+    if (text.isEmpty) {
+      _showMessage('No hay texto disponible en el portapapeles.');
+      return;
+    }
+
+    setState(() {
+      _lyricsController.text = text;
+      _lyricsController.selection = TextSelection.collapsed(
+        offset: _lyricsController.text.length,
+      );
+    });
+
+    _showMessage('Texto pegado en la letra para que puedas revisarlo.');
+  }
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -156,6 +187,13 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
   @override
   Widget build(BuildContext context) {
     final importResult = widget.importResult;
+    final helperMessage = widget.helperMessage ??
+        (importResult.supportsOcr
+            ? 'Si el OCR no detecta todo correctamente, corrige aqui antes de guardar.'
+            : 'La extraccion automatica todavia no esta activa para este archivo. Completa los campos manualmente o guarda la referencia.');
+    final helperColor = _lyricsController.text.trim().isNotEmpty
+        ? AppColors.primary
+        : AppColors.tertiary;
 
     return Scaffold(
       appBar: AppBar(title: const Text('Revisar contenido')),
@@ -195,7 +233,7 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${importResult.fileTypeLabel} • ${formatFileSize(importResult.sizeBytes)}',
+                              '${importResult.fileTypeLabel} - ${formatFileSize(importResult.sizeBytes)}',
                               style: const TextStyle(
                                 color: AppColors.textSecondary,
                               ),
@@ -218,7 +256,8 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
                             color: AppColors.surfaceSoft,
                             alignment: Alignment.center,
                             child: const Text(
-                                'No se pudo mostrar la vista previa.'),
+                              'No se pudo mostrar la vista previa.',
+                            ),
                           ),
                         ),
                       ),
@@ -231,13 +270,11 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
             Container(
               padding: const EdgeInsets.all(14),
               decoration: BoxDecoration(
-                color: AppColors.tertiary.withValues(alpha: 0.14),
+                color: helperColor.withValues(alpha: 0.14),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(color: AppColors.outline),
               ),
-              child: Text(
-                'Fase 3A: la extraccion automatica todavia no esta activa para ${importResult.sourceLabel}. Completa los campos manualmente o guarda el archivo como referencia.',
-              ),
+              child: Text(helperMessage),
             ),
             const SizedBox(height: 16),
             TextFormField(
@@ -285,6 +322,12 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
               minLines: 10,
               maxLines: 16,
               textCapitalization: TextCapitalization.sentences,
+            ),
+            const SizedBox(height: 12),
+            OutlinedButton.icon(
+              onPressed: _saving ? null : _pasteFromClipboard,
+              icon: const Icon(Icons.content_paste_go),
+              label: const Text('Pegar texto'),
             ),
             const SizedBox(height: 8),
             SwitchListTile.adaptive(

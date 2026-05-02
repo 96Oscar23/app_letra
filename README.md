@@ -112,3 +112,17 @@ flutter build apk
 Para sacar versión iPhone/iPad en Mac:
 
 flutter build ios
+
+## OCR Android
+
+Fase 3B agrega OCR para imagen y foto usando `google_mlkit_text_recognition`.
+
+Notas para Android:
+
+- `minSdkVersion 21`
+- `targetSdkVersion 35`
+- `compileSdkVersion 35`
+- el permiso de cÃ¡mara sigue siendo necesario para `Tomar foto`
+
+Con el toolchain actual del proyecto no hizo falta agregar una dependencia
+manual extra en Gradle para latin script.
