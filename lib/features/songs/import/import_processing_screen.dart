@@ -11,6 +11,21 @@ import 'song_import_result.dart';
 import 'song_import_review_screen.dart';
 import 'song_ocr_service.dart';
 
+typedef SongImportProcessor = Future<SongImportProcessingPayload> Function(
+  SongImportResult importResult, {
+  void Function(String status)? onStatusChanged,
+});
+
+class SongImportProcessingPayload {
+  const SongImportProcessingPayload({
+    required this.initialDraft,
+    required this.helperMessage,
+  });
+
+  final SongDraft initialDraft;
+  final String helperMessage;
+}
+
 class ImportProcessingScreen extends StatefulWidget {
   const ImportProcessingScreen({
     super.key,
@@ -18,16 +33,76 @@ class ImportProcessingScreen extends StatefulWidget {
     required this.initialImportResult,
     required this.retryLoader,
     required this.retryActionLabel,
-    this.textExtractor = const SongImageTextExtractor(
+    required this.processor,
+    required this.initialStatusLabel,
+    required this.noTextTitle,
+    required this.noTextMessage,
+    required this.errorTitle,
+    required this.fallbackErrorMessage,
+    required this.retrySelectionErrorMessage,
+  });
+
+  factory ImportProcessingScreen.forImage({
+    Key? key,
+    required SongsController controller,
+    required SongImportResult initialImportResult,
+    required Future<SongImportResult?> Function() retryLoader,
+    required String retryActionLabel,
+    SongImageTextExtractor textExtractor = const SongImageTextExtractor(
       MlKitSongOcrService(),
     ),
-  });
+  }) {
+    return ImportProcessingScreen(
+      key: key,
+      controller: controller,
+      initialImportResult: initialImportResult,
+      retryLoader: retryLoader,
+      retryActionLabel: retryActionLabel,
+      initialStatusLabel: 'Analizando imagen...',
+      noTextTitle: 'No se pudo extraer texto',
+      noTextMessage:
+          'Prueba con otra imagen mas clara, pega texto desde el portapapeles o continua a la revision manual.',
+      errorTitle: 'No se pudo procesar la imagen',
+      fallbackErrorMessage:
+          'Ocurrio un problema al ejecutar el OCR sobre la imagen seleccionada.',
+      retrySelectionErrorMessage:
+          'No se pudo volver a cargar la imagen seleccionada.',
+      processor: (
+        SongImportResult importResult, {
+        void Function(String status)? onStatusChanged,
+      }) async {
+        final extraction = await textExtractor.extractText(
+          importResult,
+          onStageChanged: (stage) {
+            final status = switch (stage) {
+              SongOcrStage.analyzingImage => 'Analizando imagen...',
+              SongOcrStage.extractingText => 'Extrayendo texto...',
+            };
+            onStatusChanged?.call(status);
+          },
+        );
+
+        final parsedDraft = SongTextParser.parse(extraction.normalizedText);
+        return SongImportProcessingPayload(
+          initialDraft: parsedDraft.copyWith(lyrics: extraction.normalizedText),
+          helperMessage:
+              'Se detecto texto en la imagen. Revisa y corrige antes de guardar.',
+        );
+      },
+    );
+  }
 
   final SongsController controller;
   final SongImportResult initialImportResult;
   final Future<SongImportResult?> Function() retryLoader;
   final String retryActionLabel;
-  final SongImageTextExtractor textExtractor;
+  final SongImportProcessor processor;
+  final String initialStatusLabel;
+  final String noTextTitle;
+  final String noTextMessage;
+  final String errorTitle;
+  final String fallbackErrorMessage;
+  final String retrySelectionErrorMessage;
 
   @override
   State<ImportProcessingScreen> createState() => _ImportProcessingScreenState();
@@ -42,7 +117,7 @@ enum _ProcessingStatus {
 class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
   late SongImportResult _currentImportResult;
   _ProcessingStatus _status = _ProcessingStatus.processing;
-  SongOcrStage _currentStage = SongOcrStage.analyzingImage;
+  late String _currentStatusLabel;
   String? _errorMessage;
   bool _busy = true;
 
@@ -50,25 +125,26 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
   void initState() {
     super.initState();
     _currentImportResult = widget.initialImportResult;
-    _processImage();
+    _currentStatusLabel = widget.initialStatusLabel;
+    _processImport();
   }
 
-  Future<void> _processImage() async {
+  Future<void> _processImport() async {
     setState(() {
       _busy = true;
       _status = _ProcessingStatus.processing;
-      _currentStage = SongOcrStage.analyzingImage;
+      _currentStatusLabel = widget.initialStatusLabel;
       _errorMessage = null;
     });
 
     try {
-      final extraction = await widget.textExtractor.extractText(
+      final payload = await widget.processor(
         _currentImportResult,
-        onStageChanged: (stage) {
+        onStatusChanged: (status) {
           if (!mounted) {
             return;
           }
-          setState(() => _currentStage = stage);
+          setState(() => _currentStatusLabel = status);
         },
       );
 
@@ -76,7 +152,7 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
         return;
       }
 
-      if (!extraction.hasText) {
+      if (payload.initialDraft.lyrics.trim().isEmpty) {
         setState(() {
           _busy = false;
           _status = _ProcessingStatus.noText;
@@ -84,11 +160,9 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
         return;
       }
 
-      final parsedDraft = SongTextParser.parse(extraction.normalizedText);
       _openReview(
-        initialDraft: parsedDraft.copyWith(lyrics: extraction.normalizedText),
-        helperMessage:
-            'Se detecto texto en la imagen. Revisa y corrige antes de guardar.',
+        initialDraft: payload.initialDraft,
+        helperMessage: payload.helperMessage,
       );
     } on SongImportException catch (error) {
       if (!mounted) {
@@ -106,8 +180,7 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
       setState(() {
         _busy = false;
         _status = _ProcessingStatus.error;
-        _errorMessage =
-            'Ocurrio un error al procesar la imagen. Intenta de nuevo.';
+        _errorMessage = widget.fallbackErrorMessage;
       });
     }
   }
@@ -128,7 +201,7 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
       }
 
       _currentImportResult = nextImportResult;
-      await _processImage();
+      await _processImport();
     } on SongImportException catch (error) {
       if (!mounted) {
         return;
@@ -145,7 +218,7 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
       setState(() {
         _busy = false;
         _status = _ProcessingStatus.error;
-        _errorMessage = 'No se pudo volver a cargar la imagen seleccionada.';
+        _errorMessage = widget.retrySelectionErrorMessage;
       });
     }
   }
@@ -202,11 +275,6 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final title = switch (_currentStage) {
-      SongOcrStage.analyzingImage => 'Analizando imagen...',
-      SongOcrStage.extractingText => 'Extrayendo texto...',
-    };
-
     return Scaffold(
       appBar: AppBar(title: const Text('Procesando')),
       body: Center(
@@ -217,14 +285,17 @@ class _ImportProcessingScreenState extends State<ImportProcessingScreen> {
             child: _status == _ProcessingStatus.processing
                 ? _ProcessingStateCard(
                     importResult: _currentImportResult,
-                    title: title,
+                    title: _currentStatusLabel,
                   )
                 : _ProcessingResultCard(
                     importResult: _currentImportResult,
                     status: _status,
                     busy: _busy,
                     retryActionLabel: widget.retryActionLabel,
-                    errorMessage: _errorMessage,
+                    noTextTitle: widget.noTextTitle,
+                    noTextMessage: widget.noTextMessage,
+                    errorTitle: widget.errorTitle,
+                    errorMessage: _errorMessage ?? widget.fallbackErrorMessage,
                     onRetrySelection: _retrySelection,
                     onContinueWithoutText: _continueWithoutText,
                     onPasteText: _openReviewWithClipboard,
@@ -282,9 +353,11 @@ class _ProcessingStateCard extends StatelessWidget {
           child: ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(
-              importResult.source == SongImportSource.cameraPhoto
-                  ? Icons.photo_camera_outlined
-                  : Icons.image_outlined,
+              switch (importResult.source) {
+                SongImportSource.pdf => Icons.picture_as_pdf_outlined,
+                SongImportSource.galleryImage => Icons.image_outlined,
+                SongImportSource.cameraPhoto => Icons.photo_camera_outlined,
+              },
               color: AppColors.primary,
             ),
             title: Text(importResult.fileName),
@@ -309,6 +382,9 @@ class _ProcessingResultCard extends StatelessWidget {
     required this.status,
     required this.busy,
     required this.retryActionLabel,
+    required this.noTextTitle,
+    required this.noTextMessage,
+    required this.errorTitle,
     required this.errorMessage,
     required this.onRetrySelection,
     required this.onContinueWithoutText,
@@ -319,7 +395,10 @@ class _ProcessingResultCard extends StatelessWidget {
   final _ProcessingStatus status;
   final bool busy;
   final String retryActionLabel;
-  final String? errorMessage;
+  final String noTextTitle;
+  final String noTextMessage;
+  final String errorTitle;
+  final String errorMessage;
   final VoidCallback onRetrySelection;
   final VoidCallback onContinueWithoutText;
   final VoidCallback onPasteText;
@@ -338,18 +417,13 @@ class _ProcessingResultCard extends StatelessWidget {
         ),
         const SizedBox(height: 20),
         Text(
-          isNoText
-              ? 'No se pudo extraer texto'
-              : 'No se pudo procesar la imagen',
+          isNoText ? noTextTitle : errorTitle,
           style: Theme.of(context).textTheme.headlineSmall,
           textAlign: TextAlign.center,
         ),
         const SizedBox(height: 10),
         Text(
-          isNoText
-              ? 'Prueba con otra imagen mas clara, pega texto desde el portapapeles o continua a la revision manual.'
-              : (errorMessage ??
-                  'Ocurrio un problema al ejecutar el OCR sobre la imagen seleccionada.'),
+          isNoText ? noTextMessage : errorMessage,
           textAlign: TextAlign.center,
           style: const TextStyle(color: AppColors.textSecondary),
         ),
@@ -358,9 +432,11 @@ class _ProcessingResultCard extends StatelessWidget {
           child: ListTile(
             contentPadding: EdgeInsets.zero,
             leading: Icon(
-              importResult.source == SongImportSource.cameraPhoto
-                  ? Icons.photo_camera_outlined
-                  : Icons.image_outlined,
+              switch (importResult.source) {
+                SongImportSource.pdf => Icons.picture_as_pdf_outlined,
+                SongImportSource.galleryImage => Icons.image_outlined,
+                SongImportSource.cameraPhoto => Icons.photo_camera_outlined,
+              },
               color: AppColors.primary,
             ),
             title: Text(importResult.fileName),

@@ -126,3 +126,14 @@ Notas para Android:
 
 Con el toolchain actual del proyecto no hizo falta agregar una dependencia
 manual extra en Gradle para latin script.
+
+## PDF import
+
+Fase 3C agrega extraccion basica de texto desde PDF usando `read_pdf_text`.
+
+Notas:
+
+- el paquete se usa solo para leer texto ya embebido en el PDF
+- no hace OCR sobre PDF escaneado
+- si el archivo esta protegido, dañado o no contiene texto real, la app
+  mantiene el flujo manual de revision

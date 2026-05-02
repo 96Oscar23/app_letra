@@ -6,3 +6,4 @@
 -dontwarn com.google.mlkit.vision.text.japanese.JapaneseTextRecognizerOptions
 -dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions$Builder
 -dontwarn com.google.mlkit.vision.text.korean.KoreanTextRecognizerOptions
+-dontwarn com.gemalto.jp2.JP2Decoder

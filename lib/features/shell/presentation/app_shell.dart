@@ -10,7 +10,8 @@ import '../../songs/import/import_processing_screen.dart';
 import '../../songs/import/song_file_picker_service.dart';
 import '../../songs/import/song_image_picker_service.dart';
 import '../../songs/import/song_import_result.dart';
-import '../../songs/import/song_import_review_screen.dart';
+import '../../songs/import/song_pdf_import_service.dart';
+import '../../songs/import/song_pdf_text_extractor.dart';
 import '../../songs/presentation/song_creation_options_sheet.dart';
 import '../../songs/presentation/song_detail_page.dart';
 import '../../songs/presentation/song_form_page.dart';
@@ -30,6 +31,8 @@ class _AppShellState extends State<AppShell> {
   int _currentIndex = 0;
   final SongFilePickerService _filePickerService =
       const SongFilePickerService();
+  final SongPdfTextExtractor _pdfTextExtractor =
+      const SongPdfTextExtractor(ReadPdfSongImportService());
   late final SongImagePickerService _imagePickerService;
 
   @override
@@ -93,9 +96,10 @@ class _AppShellState extends State<AppShell> {
         );
         break;
       case SongCreationAction.importPdf:
-        changed = await _openImportReview(
+        changed = await _openPdfImportFlow(
           context,
           loader: _filePickerService.pickPdf,
+          retryActionLabel: 'Seleccionar otro PDF',
         );
         break;
       case SongCreationAction.importImage:
@@ -119,9 +123,10 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
-  Future<bool?> _openImportReview(
+  Future<bool?> _openImageImportFlow(
     BuildContext context, {
     required Future<SongImportResult?> Function() loader,
+    required String retryActionLabel,
   }) async {
     final songsController = AppScope.of(context).songsController;
 
@@ -138,9 +143,11 @@ class _AppShellState extends State<AppShell> {
 
       return Navigator.of(context).push<bool>(
         MaterialPageRoute(
-          builder: (_) => SongImportReviewScreen(
+          builder: (_) => ImportProcessingScreen.forImage(
             controller: songsController,
-            importResult: result,
+            initialImportResult: result,
+            retryLoader: loader,
+            retryActionLabel: retryActionLabel,
           ),
         ),
       );
@@ -153,14 +160,14 @@ class _AppShellState extends State<AppShell> {
       if (context.mounted) {
         _showMessage(
           context,
-          'No se pudo abrir el flujo de importacion. Intenta de nuevo.',
+          'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
         );
       }
       return false;
     }
   }
 
-  Future<bool?> _openImageImportFlow(
+  Future<bool?> _openPdfImportFlow(
     BuildContext context, {
     required Future<SongImportResult?> Function() loader,
     required String retryActionLabel,
@@ -185,6 +192,28 @@ class _AppShellState extends State<AppShell> {
             initialImportResult: result,
             retryLoader: loader,
             retryActionLabel: retryActionLabel,
+            initialStatusLabel: 'Extrayendo texto del PDF...',
+            noTextTitle: 'No se pudo extraer texto de este PDF',
+            noTextMessage:
+                'Este PDF puede estar escaneado o no contener texto seleccionable. Prueba con otro PDF, pega texto o continua a la revision manual.',
+            errorTitle: 'No se pudo procesar el PDF',
+            fallbackErrorMessage:
+                'Ocurrio un problema al leer el PDF seleccionado.',
+            retrySelectionErrorMessage:
+                'No se pudo volver a cargar el PDF seleccionado.',
+            processor: (
+              SongImportResult importResult, {
+              void Function(String status)? onStatusChanged,
+            }) async {
+              onStatusChanged?.call('Extrayendo texto del PDF...');
+              final extraction =
+                  await _pdfTextExtractor.extractText(importResult);
+              return SongImportProcessingPayload(
+                initialDraft: extraction.initialDraft,
+                helperMessage:
+                    'Se detecto texto en el PDF. Revisa y corrige antes de guardar.',
+              );
+            },
           ),
         ),
       );
@@ -197,7 +226,7 @@ class _AppShellState extends State<AppShell> {
       if (context.mounted) {
         _showMessage(
           context,
-          'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
+          'No se pudo abrir el flujo de importacion del PDF.',
         );
       }
       return false;
