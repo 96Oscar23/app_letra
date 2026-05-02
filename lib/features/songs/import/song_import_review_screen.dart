@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:path/path.dart' as path;
 
 import '../../../app/theme/app_colors.dart';
 import '../../../shared/widgets/app_card.dart';
@@ -133,7 +134,11 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
         referenceFilePath: _saveReference ? storedResult.localPath : null,
         referenceFileName: _saveReference ? storedResult.fileName : null,
         referenceFileType: _saveReference ? storedResult.fileTypeLabel : null,
+        referenceFileExtension: _saveReference
+            ? path.extension(storedResult.fileName).replaceFirst('.', '')
+            : null,
         referenceFileSizeBytes: _saveReference ? storedResult.sizeBytes : null,
+        referenceImportedAt: _saveReference ? DateTime.now() : null,
       );
 
       await widget.controller.saveDraft(draft: draft);

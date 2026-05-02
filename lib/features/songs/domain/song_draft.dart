@@ -15,7 +15,9 @@ class SongDraft {
     this.referenceFilePath,
     this.referenceFileName,
     this.referenceFileType,
+    this.referenceFileExtension,
     this.referenceFileSizeBytes,
+    this.referenceImportedAt,
   });
 
   final String title;
@@ -31,7 +33,9 @@ class SongDraft {
   final String? referenceFilePath;
   final String? referenceFileName;
   final String? referenceFileType;
+  final String? referenceFileExtension;
   final int? referenceFileSizeBytes;
+  final DateTime? referenceImportedAt;
 
   factory SongDraft.fromSong(Song song) {
     return SongDraft(
@@ -48,7 +52,9 @@ class SongDraft {
       referenceFilePath: song.referenceFilePath,
       referenceFileName: song.referenceFileName,
       referenceFileType: song.referenceFileType,
+      referenceFileExtension: song.referenceFileExtension,
       referenceFileSizeBytes: song.referenceFileSizeBytes,
+      referenceImportedAt: song.referenceImportedAt,
     );
   }
 
@@ -63,10 +69,12 @@ class SongDraft {
     int? bpm,
     List<String>? tags,
     String? status,
-    String? referenceFilePath,
-    String? referenceFileName,
-    String? referenceFileType,
-    int? referenceFileSizeBytes,
+    Object? referenceFilePath = _draftSentinel,
+    Object? referenceFileName = _draftSentinel,
+    Object? referenceFileType = _draftSentinel,
+    Object? referenceFileExtension = _draftSentinel,
+    Object? referenceFileSizeBytes = _draftSentinel,
+    Object? referenceImportedAt = _draftSentinel,
   }) {
     return SongDraft(
       title: title ?? this.title,
@@ -79,11 +87,24 @@ class SongDraft {
       bpm: bpm ?? this.bpm,
       tags: tags ?? this.tags,
       status: status ?? this.status,
-      referenceFilePath: referenceFilePath ?? this.referenceFilePath,
-      referenceFileName: referenceFileName ?? this.referenceFileName,
-      referenceFileType: referenceFileType ?? this.referenceFileType,
-      referenceFileSizeBytes:
-          referenceFileSizeBytes ?? this.referenceFileSizeBytes,
+      referenceFilePath: referenceFilePath == _draftSentinel
+          ? this.referenceFilePath
+          : referenceFilePath as String?,
+      referenceFileName: referenceFileName == _draftSentinel
+          ? this.referenceFileName
+          : referenceFileName as String?,
+      referenceFileType: referenceFileType == _draftSentinel
+          ? this.referenceFileType
+          : referenceFileType as String?,
+      referenceFileExtension: referenceFileExtension == _draftSentinel
+          ? this.referenceFileExtension
+          : referenceFileExtension as String?,
+      referenceFileSizeBytes: referenceFileSizeBytes == _draftSentinel
+          ? this.referenceFileSizeBytes
+          : referenceFileSizeBytes as int?,
+      referenceImportedAt: referenceImportedAt == _draftSentinel
+          ? this.referenceImportedAt
+          : referenceImportedAt as DateTime?,
     );
   }
 
@@ -110,10 +131,14 @@ class SongDraft {
       referenceFilePath: referenceFilePath?.trim(),
       referenceFileName: referenceFileName?.trim(),
       referenceFileType: referenceFileType?.trim(),
+      referenceFileExtension: referenceFileExtension?.trim(),
       referenceFileSizeBytes: referenceFileSizeBytes,
+      referenceImportedAt: referenceImportedAt,
       isFavorite: isFavorite,
       createdAt: createdAt,
       updatedAt: updatedAt,
     );
   }
 }
+
+const _draftSentinel = Object();

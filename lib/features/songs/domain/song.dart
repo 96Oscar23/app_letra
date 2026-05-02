@@ -16,7 +16,9 @@ class Song {
     this.referenceFilePath,
     this.referenceFileName,
     this.referenceFileType,
+    this.referenceFileExtension,
     this.referenceFileSizeBytes,
+    this.referenceImportedAt,
     required this.isFavorite,
     required this.createdAt,
     required this.updatedAt,
@@ -36,7 +38,9 @@ class Song {
   final String? referenceFilePath;
   final String? referenceFileName;
   final String? referenceFileType;
+  final String? referenceFileExtension;
   final int? referenceFileSizeBytes;
+  final DateTime? referenceImportedAt;
   final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -57,10 +61,12 @@ class Song {
     int? bpm,
     List<String>? tags,
     String? status,
-    String? referenceFilePath,
-    String? referenceFileName,
-    String? referenceFileType,
-    int? referenceFileSizeBytes,
+    Object? referenceFilePath = _sentinel,
+    Object? referenceFileName = _sentinel,
+    Object? referenceFileType = _sentinel,
+    Object? referenceFileExtension = _sentinel,
+    Object? referenceFileSizeBytes = _sentinel,
+    Object? referenceImportedAt = _sentinel,
     bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -77,11 +83,24 @@ class Song {
       bpm: bpm ?? this.bpm,
       tags: tags ?? this.tags,
       status: status ?? this.status,
-      referenceFilePath: referenceFilePath ?? this.referenceFilePath,
-      referenceFileName: referenceFileName ?? this.referenceFileName,
-      referenceFileType: referenceFileType ?? this.referenceFileType,
-      referenceFileSizeBytes:
-          referenceFileSizeBytes ?? this.referenceFileSizeBytes,
+      referenceFilePath: referenceFilePath == _sentinel
+          ? this.referenceFilePath
+          : referenceFilePath as String?,
+      referenceFileName: referenceFileName == _sentinel
+          ? this.referenceFileName
+          : referenceFileName as String?,
+      referenceFileType: referenceFileType == _sentinel
+          ? this.referenceFileType
+          : referenceFileType as String?,
+      referenceFileExtension: referenceFileExtension == _sentinel
+          ? this.referenceFileExtension
+          : referenceFileExtension as String?,
+      referenceFileSizeBytes: referenceFileSizeBytes == _sentinel
+          ? this.referenceFileSizeBytes
+          : referenceFileSizeBytes as int?,
+      referenceImportedAt: referenceImportedAt == _sentinel
+          ? this.referenceImportedAt
+          : referenceImportedAt as DateTime?,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -104,7 +123,9 @@ class Song {
       'reference_file_path': referenceFilePath,
       'reference_file_name': referenceFileName,
       'reference_file_type': referenceFileType,
+      'reference_file_extension': referenceFileExtension,
       'reference_file_size_bytes': referenceFileSizeBytes,
+      'reference_imported_at': referenceImportedAt?.toIso8601String(),
       'is_favorite': isFavorite ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -127,11 +148,22 @@ class Song {
       referenceFilePath: map['reference_file_path'] as String?,
       referenceFileName: map['reference_file_name'] as String?,
       referenceFileType: map['reference_file_type'] as String?,
+      referenceFileExtension: map['reference_file_extension'] as String?,
       referenceFileSizeBytes: map['reference_file_size_bytes'] as int?,
+      referenceImportedAt: _parseOptionalDate(
+        map['reference_imported_at'] as String?,
+      ),
       isFavorite: (map['is_favorite'] as int? ?? 0) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),
     );
+  }
+
+  static DateTime? _parseOptionalDate(String? value) {
+    if (value == null || value.trim().isEmpty) {
+      return null;
+    }
+    return DateTime.tryParse(value);
   }
 
   static List<String> _tagsFromStoredValue(Object? rawValue) {
@@ -159,6 +191,8 @@ class Song {
     return const [];
   }
 }
+
+const _sentinel = Object();
 
 class SongStatuses {
   static const draft = 'Borrador';

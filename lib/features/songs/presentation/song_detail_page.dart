@@ -11,10 +11,11 @@ import '../../../app/theme/app_colors.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../settings/settings_controller.dart';
 import '../domain/song.dart';
-import '../import/song_import_result.dart';
+import '../import/imported_file_storage.dart';
 import '../songs_controller.dart';
 import '../utils/song_plain_text_formatter.dart';
 import 'song_form_page.dart';
+import 'widgets/song_reference_card.dart';
 
 enum _SongDetailAction {
   copyLyrics,
@@ -39,7 +40,9 @@ class SongDetailPage extends StatefulWidget {
 }
 
 class _SongDetailPageState extends State<SongDetailPage> {
+  final ImportedFileStorage _importedFileStorage = const ImportedFileStorage();
   Song? _song;
+  bool _referenceExists = true;
 
   @override
   void initState() {
@@ -50,7 +53,14 @@ class _SongDetailPageState extends State<SongDetailPage> {
   Future<void> _loadSong() async {
     final song = await widget.songsController.findById(widget.songId);
     if (!mounted) return;
-    setState(() => _song = song);
+    final referenceExists = song == null || !song.hasReference
+        ? false
+        : await _importedFileStorage.exists(song.referenceFilePath);
+    if (!mounted) return;
+    setState(() {
+      _song = song;
+      _referenceExists = referenceExists;
+    });
   }
 
   Future<void> _editSong() async {
@@ -92,6 +102,61 @@ class _SongDetailPageState extends State<SongDetailPage> {
     await widget.songsController.deleteSong(_song!.id!);
     if (!mounted) return;
     Navigator.of(context).pop(true);
+  }
+
+  Future<void> _openReference() async {
+    final song = _song;
+    if (song == null || !song.hasReference) {
+      return;
+    }
+
+    try {
+      await _importedFileStorage.openReference(song);
+    } on Exception catch (error) {
+      if (!mounted) {
+        return;
+      }
+      _showMessage(error.toString().replaceFirst('Exception: ', ''));
+      await _loadSong();
+    }
+  }
+
+  Future<void> _removeReference() async {
+    final song = _song;
+    if (song == null || !song.hasReference) {
+      return;
+    }
+
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Quitar referencia'),
+        content: const Text(
+          'Se quitara el archivo asociado, pero el canto seguira existiendo.',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancelar'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Quitar'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed != true) {
+      return;
+    }
+
+    await widget.songsController.removeReference(song);
+    if (!mounted) {
+      return;
+    }
+    _showMessage('Referencia quitada correctamente.');
+    await _loadSong();
   }
 
   Future<void> _handleAction(_SongDetailAction action) async {
@@ -241,59 +306,11 @@ class _SongDetailPageState extends State<SongDetailPage> {
           ),
           if (song.hasReference) ...[
             const SizedBox(height: 16),
-            AppCard(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Container(
-                        width: 42,
-                        height: 42,
-                        decoration: BoxDecoration(
-                          color: AppColors.primary.withValues(alpha: 0.16),
-                          borderRadius: BorderRadius.circular(14),
-                        ),
-                        child: Icon(
-                          (song.referenceFileType ?? '').toLowerCase() == 'pdf'
-                              ? Icons.picture_as_pdf_outlined
-                              : Icons.attach_file_rounded,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                      const SizedBox(width: 12),
-                      Expanded(
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              'Archivo de referencia',
-                              style: Theme.of(context).textTheme.titleMedium,
-                            ),
-                            const SizedBox(height: 4),
-                            Text(
-                              song.referenceFileName ?? 'Referencia guardada',
-                              style: const TextStyle(
-                                color: AppColors.textSecondary,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 12),
-                  Wrap(
-                    spacing: 8,
-                    runSpacing: 8,
-                    children: [
-                      if ((song.referenceFileType ?? '').isNotEmpty)
-                        _Tag(label: song.referenceFileType!),
-                      _Tag(label: formatFileSize(song.referenceFileSizeBytes)),
-                    ],
-                  ),
-                ],
-              ),
+            SongReferenceCard(
+              song: song,
+              referenceExists: _referenceExists,
+              onOpenReference: _openReference,
+              onRemoveReference: _removeReference,
             ),
           ],
           const SizedBox(height: 16),

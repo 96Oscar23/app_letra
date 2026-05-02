@@ -22,7 +22,7 @@ class LocalDatabase {
 
     return openDatabase(
       fullPath,
-      version: 3,
+      version: 4,
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE songs(
@@ -40,7 +40,9 @@ class LocalDatabase {
             reference_file_path TEXT,
             reference_file_name TEXT,
             reference_file_type TEXT,
+            reference_file_extension TEXT,
             reference_file_size_bytes INTEGER,
+            reference_imported_at TEXT,
             is_favorite INTEGER NOT NULL DEFAULT 0,
             created_at TEXT NOT NULL,
             updated_at TEXT NOT NULL
@@ -74,6 +76,14 @@ class LocalDatabase {
           );
           await db.execute(
             'ALTER TABLE songs ADD COLUMN reference_file_size_bytes INTEGER',
+          );
+        }
+        if (oldVersion < 4) {
+          await db.execute(
+            'ALTER TABLE songs ADD COLUMN reference_file_extension TEXT',
+          );
+          await db.execute(
+            'ALTER TABLE songs ADD COLUMN reference_imported_at TEXT',
           );
         }
       },

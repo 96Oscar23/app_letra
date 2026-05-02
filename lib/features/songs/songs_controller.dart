@@ -3,13 +3,18 @@ import 'package:flutter/foundation.dart';
 import 'data/song_repository.dart';
 import 'domain/song_draft.dart';
 import 'domain/song.dart';
+import 'import/imported_file_storage.dart';
 
 enum SongFilter { all, favorites }
 
 class SongsController extends ChangeNotifier {
-  SongsController(this._repository);
+  SongsController(
+    this._repository, {
+    ImportedFileStorage importedFileStorage = const ImportedFileStorage(),
+  }) : _importedFileStorage = importedFileStorage;
 
   final SongRepository _repository;
+  final ImportedFileStorage _importedFileStorage;
 
   List<Song> _songs = const [];
   String _query = '';
@@ -99,7 +104,25 @@ class SongsController extends ChangeNotifier {
   }
 
   Future<void> deleteSong(int id) async {
+    final current = await _repository.findById(id);
+    await _importedFileStorage.deleteIfExists(current?.referenceFilePath);
     await _repository.deleteSong(id);
+    await loadSongs();
+  }
+
+  Future<void> removeReference(Song song) async {
+    await _importedFileStorage.deleteIfExists(song.referenceFilePath);
+    await _repository.updateSong(
+      song.copyWith(
+        referenceFilePath: '',
+        referenceFileName: '',
+        referenceFileType: '',
+        referenceFileExtension: '',
+        referenceFileSizeBytes: null,
+        referenceImportedAt: null,
+        updatedAt: DateTime.now(),
+      ),
+    );
     await loadSongs();
   }
 }
