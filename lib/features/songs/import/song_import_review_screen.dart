@@ -193,9 +193,9 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
   Widget build(BuildContext context) {
     final importResult = widget.importResult;
     final helperMessage = widget.helperMessage ??
-        (importResult.supportsOcr
-            ? 'Si el OCR no detecta todo correctamente, corrige aqui antes de guardar.'
-            : 'La extraccion automatica todavia no esta activa para este archivo. Completa los campos manualmente o guarda la referencia.');
+        (importResult.source == SongImportSource.pdf
+            ? 'Si el PDF no se pudo leer completamente, corrige aqui antes de guardar o conserva la referencia.'
+            : 'Si la extraccion no detecta todo correctamente, corrige aqui antes de guardar.');
     final helperColor = _lyricsController.text.trim().isNotEmpty
         ? AppColors.primary
         : AppColors.tertiary;

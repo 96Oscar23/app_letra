@@ -96,102 +96,14 @@ class _AppShellState extends State<AppShell> {
         );
         break;
       case SongCreationAction.importPdf:
-        changed = await _openPdfImportFlow(
+        changed = await _openProcessedImportFlow(
           context,
           loader: _filePickerService.pickPdf,
-          retryActionLabel: 'Seleccionar otro PDF',
-        );
-        break;
-      case SongCreationAction.importImage:
-        changed = await _openImageImportFlow(
-          context,
-          loader: _imagePickerService.pickFromGallery,
-          retryActionLabel: 'Seleccionar otra imagen',
-        );
-        break;
-      case SongCreationAction.takePhoto:
-        changed = await _openImageImportFlow(
-          context,
-          loader: _imagePickerService.takePhoto,
-          retryActionLabel: 'Tomar otra foto',
-        );
-        break;
-    }
-
-    if (changed == true) {
-      await songsController.loadSongs();
-    }
-  }
-
-  Future<bool?> _openImageImportFlow(
-    BuildContext context, {
-    required Future<SongImportResult?> Function() loader,
-    required String retryActionLabel,
-  }) async {
-    final songsController = AppScope.of(context).songsController;
-
-    try {
-      final result = await loader();
-      if (!context.mounted) {
-        return null;
-      }
-
-      if (result == null) {
-        _showMessage(context, 'Seleccion cancelada.');
-        return false;
-      }
-
-      return Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => ImportProcessingScreen.forImage(
+          openScreen: (songsController, result) => ImportProcessingScreen(
             controller: songsController,
             initialImportResult: result,
-            retryLoader: loader,
-            retryActionLabel: retryActionLabel,
-          ),
-        ),
-      );
-    } on SongImportException catch (error) {
-      if (context.mounted) {
-        _showMessage(context, error.message);
-      }
-      return false;
-    } catch (_) {
-      if (context.mounted) {
-        _showMessage(
-          context,
-          'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
-        );
-      }
-      return false;
-    }
-  }
-
-  Future<bool?> _openPdfImportFlow(
-    BuildContext context, {
-    required Future<SongImportResult?> Function() loader,
-    required String retryActionLabel,
-  }) async {
-    final songsController = AppScope.of(context).songsController;
-
-    try {
-      final result = await loader();
-      if (!context.mounted) {
-        return null;
-      }
-
-      if (result == null) {
-        _showMessage(context, 'Seleccion cancelada.');
-        return false;
-      }
-
-      return Navigator.of(context).push<bool>(
-        MaterialPageRoute(
-          builder: (_) => ImportProcessingScreen(
-            controller: songsController,
-            initialImportResult: result,
-            retryLoader: loader,
-            retryActionLabel: retryActionLabel,
+            retryLoader: _filePickerService.pickPdf,
+            retryActionLabel: 'Seleccionar otro PDF',
             initialStatusLabel: 'Extrayendo texto del PDF...',
             noTextTitle: 'No se pudo extraer texto de este PDF',
             noTextMessage:
@@ -215,6 +127,72 @@ class _AppShellState extends State<AppShell> {
               );
             },
           ),
+          genericErrorMessage:
+              'No se pudo abrir el flujo de importacion del PDF.',
+        );
+        break;
+      case SongCreationAction.importImage:
+        changed = await _openProcessedImportFlow(
+          context,
+          loader: _imagePickerService.pickFromGallery,
+          openScreen: (songsController, result) =>
+              ImportProcessingScreen.forImage(
+            controller: songsController,
+            initialImportResult: result,
+            retryLoader: _imagePickerService.pickFromGallery,
+            retryActionLabel: 'Seleccionar otra imagen',
+          ),
+          genericErrorMessage:
+              'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
+        );
+        break;
+      case SongCreationAction.takePhoto:
+        changed = await _openProcessedImportFlow(
+          context,
+          loader: _imagePickerService.takePhoto,
+          openScreen: (songsController, result) =>
+              ImportProcessingScreen.forImage(
+            controller: songsController,
+            initialImportResult: result,
+            retryLoader: _imagePickerService.takePhoto,
+            retryActionLabel: 'Tomar otra foto',
+          ),
+          genericErrorMessage:
+              'No se pudo abrir el flujo de OCR para la imagen seleccionada.',
+        );
+        break;
+    }
+
+    if (changed == true) {
+      await songsController.loadSongs();
+    }
+  }
+
+  Future<bool?> _openProcessedImportFlow(
+    BuildContext context, {
+    required Future<SongImportResult?> Function() loader,
+    required Widget Function(
+      SongsController songsController,
+      SongImportResult result,
+    ) openScreen,
+    required String genericErrorMessage,
+  }) async {
+    final songsController = AppScope.of(context).songsController;
+
+    try {
+      final result = await loader();
+      if (!context.mounted) {
+        return null;
+      }
+
+      if (result == null) {
+        _showMessage(context, 'Seleccion cancelada.');
+        return false;
+      }
+
+      return Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => openScreen(songsController, result),
         ),
       );
     } on SongImportException catch (error) {
@@ -224,10 +202,7 @@ class _AppShellState extends State<AppShell> {
       return false;
     } catch (_) {
       if (context.mounted) {
-        _showMessage(
-          context,
-          'No se pudo abrir el flujo de importacion del PDF.',
-        );
+        _showMessage(context, genericErrorMessage);
       }
       return false;
     }
