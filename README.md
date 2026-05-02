@@ -35,3 +35,80 @@ flutter devices
 comando para correr proyecto en un equipo
 
 flutter run -d <id_dispositivo>
+
+
+### Comandos nuevos 
+Comandos básicos
+
+flutter clean
+Limpia el proyecto.
+
+flutter pub get
+Descarga/actualiza dependencias.
+
+flutter devices
+Busca dispositivos disponibles.
+
+flutter run
+Inicia la app en modo debug.
+
+flutter run -d <id_dispositivo>
+Inicia la app en un dispositivo específico.
+
+flutter analyze
+Revisa errores y warnings.
+
+flutter test
+Corre tests.
+
+Generar una nueva APK
+
+flutter build apk
+Genera una APK nueva en modo release.
+
+Archivo generado:
+
+build/app/outputs/flutter-apk/app-release.apk
+Si quieres una APK de debug:
+
+flutter build apk --debug
+Si quieres una APK por arquitectura más ligera:
+
+flutter build apk --split-per-abi
+Archivos generados normalmente:
+
+build/app/outputs/flutter-apk/app-armeabi-v7a-release.apk
+build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+build/app/outputs/flutter-apk/app-x86_64-release.apk
+Cuando tengas Mac
+En Mac podrás hacer lo mismo para Flutter general:
+
+flutter clean
+flutter pub get
+flutter devices
+flutter run
+flutter run -d <id_dispositivo>
+flutter analyze
+flutter test
+flutter build apk
+Y además para iPhone/iPad:
+
+flutter build ios
+Genera la app de iOS para abrirla en Xcode.
+
+flutter run -d <id_ios>
+Corre la app en un iPhone/iPad conectado o simulador.
+
+open ios/Runner.xcworkspace
+Abre el proyecto iOS en Xcode.
+
+Resumen rápido
+Para probar:
+
+flutter run -d <id_dispositivo>
+Para sacar una nueva APK:
+
+flutter build apk
+Para sacar versión iPhone/iPad en Mac:
+
+flutter build ios

@@ -1,30 +1,53 @@
-// This is a basic Flutter widget test.
-//
-// To perform an interaction with a widget in your test, use the WidgetTester
-// utility in the flutter_test package. For example, you can send tap and scroll
-// gestures. You can also use WidgetTester to find child widgets in the widget
-// tree, read text, and verify that the values of widget properties are correct.
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:app_letras/main.dart';
+import 'package:app_letras/app/app.dart';
+import 'package:app_letras/app/bootstrap/app_dependencies.dart';
+import 'package:app_letras/features/settings/data/in_memory_settings_repository.dart';
+import 'package:app_letras/features/songs/data/in_memory_song_repository.dart';
 
 void main() {
-  testWidgets('Counter increments smoke test', (WidgetTester tester) async {
-    // Build our app and trigger a frame.
-    await tester.pumpWidget(const MyApp());
+  testWidgets('muestra navegacion principal y biblioteca local',
+      (tester) async {
+    final dependencies = AppDependencies(
+      songRepository: InMemorySongRepository(),
+      settingsRepository: InMemorySettingsRepository(),
+    );
 
-    // Verify that our counter starts at 0.
-    expect(find.text('0'), findsOneWidget);
-    expect(find.text('1'), findsNothing);
+    await tester.pumpWidget(LumenVesperApp(dependencies: dependencies));
+    await tester.pumpAndSettle();
 
-    // Tap the '+' icon and trigger a frame.
+    expect(find.text('Inicio'), findsWidgets);
+    expect(find.text('Canciones'), findsWidgets);
+    expect(find.text('Tu biblioteca local'), findsOneWidget);
+    expect(find.text('Great Is Thy Faithfulness'), findsNothing);
+
+    await tester.tap(find.text('Canciones').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('Great Is Thy Faithfulness'), findsOneWidget);
+  });
+
+  testWidgets('muestra opciones de captura desde el boton agregar',
+      (tester) async {
+    final dependencies = AppDependencies(
+      songRepository: InMemorySongRepository(),
+      settingsRepository: InMemorySettingsRepository(),
+    );
+
+    await tester.pumpWidget(LumenVesperApp(dependencies: dependencies));
+    await tester.pumpAndSettle();
+
     await tester.tap(find.byIcon(Icons.add));
-    await tester.pump();
+    await tester.pumpAndSettle();
 
-    // Verify that our counter has incremented.
-    expect(find.text('0'), findsNothing);
-    expect(find.text('1'), findsOneWidget);
+    expect(find.text('Agregar contenido'), findsOneWidget);
+    expect(find.text('Nuevo canto rapido'), findsOneWidget);
+    expect(find.text('Nuevo canto completo'), findsOneWidget);
+    expect(find.text('Pegar texto'), findsOneWidget);
+    expect(find.text('Importar archivo .txt'), findsOneWidget);
+    expect(find.text('Importar PDF'), findsOneWidget);
+    expect(find.text('Importar imagen'), findsOneWidget);
+    expect(find.text('Tomar foto'), findsOneWidget);
   });
 }
