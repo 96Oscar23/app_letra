@@ -14,6 +14,7 @@ void main() {
       referenceFileExtension: 'pdf',
       referenceFileSizeBytes: 4096,
       referenceImportedAt: DateTime(2026, 5, 2),
+      lastOpenedAt: DateTime(2026, 5, 3, 8, 30),
     );
 
     final song = draft.toSong(
@@ -30,6 +31,7 @@ void main() {
     expect(song.referenceFileExtension, 'pdf');
     expect(song.referenceFileSizeBytes, 4096);
     expect(song.referenceImportedAt, DateTime(2026, 5, 2));
+    expect(song.lastOpenedAt, DateTime(2026, 5, 3, 8, 30));
 
     final rebuiltDraft = SongDraft.fromSong(song);
 
@@ -39,6 +41,7 @@ void main() {
     expect(rebuiltDraft.referenceFileExtension, 'pdf');
     expect(rebuiltDraft.referenceFileSizeBytes, 4096);
     expect(rebuiltDraft.referenceImportedAt, DateTime(2026, 5, 2));
+    expect(rebuiltDraft.lastOpenedAt, DateTime(2026, 5, 3, 8, 30));
   });
 
   test('serializa metadatos de referencia hacia sqlite map', () {
@@ -49,6 +52,7 @@ void main() {
       baseKey: 'G',
       author: 'Autor',
       category: '',
+      genre: 'Balada',
       notes: '',
       capo: '',
       bpm: 80,
@@ -60,6 +64,7 @@ void main() {
       referenceFileExtension: 'jpg',
       referenceFileSizeBytes: 5120,
       referenceImportedAt: DateTime(2026, 5, 2, 10, 30),
+      lastOpenedAt: DateTime(2026, 5, 3, 14, 15),
       isFavorite: false,
       createdAt: DateTime(2026, 5, 2),
       updatedAt: DateTime(2026, 5, 2),
@@ -73,5 +78,6 @@ void main() {
     expect(rebuilt.referenceFileExtension, 'jpg');
     expect(rebuilt.referenceFileSizeBytes, 5120);
     expect(rebuilt.referenceImportedAt, DateTime(2026, 5, 2, 10, 30));
+    expect(rebuilt.lastOpenedAt, DateTime(2026, 5, 3, 14, 15));
   });
 }

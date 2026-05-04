@@ -12,6 +12,7 @@ void main() {
       baseKey: 'C',
       author: 'Equipo',
       category: 'Adoracion',
+      genre: 'Worship',
       notes: 'Version acustica',
       capo: '2',
       bpm: 74,

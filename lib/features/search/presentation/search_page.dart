@@ -9,16 +9,19 @@ class SearchPage extends StatelessWidget {
     super.key,
     required this.controller,
     required this.onOpenSong,
+    required this.onEditSong,
   });
 
   final SongsController controller;
   final ValueChanged<Song> onOpenSong;
+  final Future<bool?> Function(Song song) onEditSong;
 
   @override
   Widget build(BuildContext context) {
     return SongsPage(
       controller: controller,
       onOpenSong: onOpenSong,
+      onEditSong: onEditSong,
     );
   }
 }

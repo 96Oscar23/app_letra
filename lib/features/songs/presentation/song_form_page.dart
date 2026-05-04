@@ -51,6 +51,7 @@ class _SongFormPageState extends State<SongFormPage> {
   late final TextEditingController _lyricsController;
   late final TextEditingController _authorController;
   late final TextEditingController _categoryController;
+  late final TextEditingController _genreController;
   late final TextEditingController _notesController;
   late final TextEditingController _tagsController;
   late final String? _referenceFilePath;
@@ -108,6 +109,7 @@ class _SongFormPageState extends State<SongFormPage> {
     _lyricsController = TextEditingController(text: draft.lyrics);
     _authorController = TextEditingController(text: draft.author);
     _categoryController = TextEditingController(text: draft.category);
+    _genreController = TextEditingController(text: draft.genre);
     _notesController = TextEditingController(text: draft.notes);
     _tagsController = TextEditingController(text: draft.tags.join(', '));
     _referenceFilePath = draft.referenceFilePath;
@@ -130,6 +132,7 @@ class _SongFormPageState extends State<SongFormPage> {
     _lyricsController.dispose();
     _authorController.dispose();
     _categoryController.dispose();
+    _genreController.dispose();
     _notesController.dispose();
     _tagsController.dispose();
     super.dispose();
@@ -159,6 +162,7 @@ class _SongFormPageState extends State<SongFormPage> {
       baseKey: _composeBaseKey(),
       author: _authorController.text.trim(),
       category: _categoryController.text.trim(),
+      genre: _genreController.text.trim(),
       notes: _notesController.text.trim(),
       capo: _isQuick ? '' : '$_capoValue',
       bpm: _isQuick ? null : _bpmValue.round(),
@@ -333,6 +337,14 @@ class _SongFormPageState extends State<SongFormPage> {
                 TextFormField(
                   controller: _categoryController,
                   decoration: const InputDecoration(labelText: 'Categoria'),
+                ),
+                const SizedBox(height: 12),
+                TextFormField(
+                  controller: _genreController,
+                  decoration: const InputDecoration(
+                    labelText: 'Genero musical',
+                  ),
+                  textCapitalization: TextCapitalization.words,
                 ),
                 const SizedBox(height: 12),
                 TextFormField(

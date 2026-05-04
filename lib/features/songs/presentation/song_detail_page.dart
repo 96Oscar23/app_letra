@@ -15,6 +15,7 @@ import '../import/imported_file_storage.dart';
 import '../songs_controller.dart';
 import '../utils/song_plain_text_formatter.dart';
 import 'song_form_page.dart';
+import 'song_tags_page.dart';
 import 'widgets/song_reference_card.dart';
 
 enum _SongDetailAction {
@@ -47,7 +48,12 @@ class _SongDetailPageState extends State<SongDetailPage> {
   @override
   void initState() {
     super.initState();
-    _loadSong();
+    _initializeDetail();
+  }
+
+  Future<void> _initializeDetail() async {
+    await widget.songsController.markSongOpened(widget.songId);
+    await _loadSong();
   }
 
   Future<void> _loadSong() async {
@@ -71,6 +77,25 @@ class _SongDetailPageState extends State<SongDetailPage> {
           controller: widget.songsController,
           song: _song,
           mode: SongFormMode.complete,
+        ),
+      ),
+    );
+    if (changed == true) {
+      await _loadSong();
+    }
+  }
+
+  Future<void> _manageTags() async {
+    final song = _song;
+    if (song?.id == null) {
+      return;
+    }
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => SongTagsPage(
+          controller: widget.songsController,
+          songId: song!.id!,
+          songTitle: song.title,
         ),
       ),
     );
@@ -240,7 +265,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
               await _loadSong();
             },
             icon: Icon(
-              song.isFavorite ? Icons.favorite : Icons.favorite_border,
+              song.isFavorite ? Icons.star_rounded : Icons.star_border_rounded,
               color: song.isFavorite ? AppColors.tertiary : null,
             ),
           ),
@@ -286,6 +311,7 @@ class _SongDetailPageState extends State<SongDetailPage> {
                     if (song.baseKey.isNotEmpty) _Tag(label: song.baseKey),
                     if (song.author.isNotEmpty) _Tag(label: song.author),
                     if (song.category.isNotEmpty) _Tag(label: song.category),
+                    if (song.genre.isNotEmpty) _Tag(label: song.genre),
                     if (song.capo.isNotEmpty) _Tag(label: 'Capo ${song.capo}'),
                     if (song.bpm != null) _Tag(label: '${song.bpm} BPM'),
                     if (song.status.isNotEmpty) _Tag(label: song.status),
@@ -313,6 +339,41 @@ class _SongDetailPageState extends State<SongDetailPage> {
               onRemoveReference: _removeReference,
             ),
           ],
+          const SizedBox(height: 16),
+          AppCard(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      'Etiquetas',
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
+                    const Spacer(),
+                    TextButton.icon(
+                      onPressed: _manageTags,
+                      icon: const Icon(Icons.label_outline_rounded),
+                      label: const Text('Administrar etiquetas'),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                if (song.tags.isEmpty)
+                  const Text(
+                    'Este canto todavia no tiene etiquetas asignadas.',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  )
+                else
+                  Wrap(
+                    spacing: 8,
+                    runSpacing: 8,
+                    children:
+                        song.tags.map((tag) => _Tag(label: '#$tag')).toList(),
+                  ),
+              ],
+            ),
+          ),
           const SizedBox(height: 16),
           AppCard(
             child: Text(

@@ -8,6 +8,7 @@ class Song {
     required this.baseKey,
     required this.author,
     required this.category,
+    required this.genre,
     required this.notes,
     required this.capo,
     required this.bpm,
@@ -19,6 +20,7 @@ class Song {
     this.referenceFileExtension,
     this.referenceFileSizeBytes,
     this.referenceImportedAt,
+    this.lastOpenedAt,
     required this.isFavorite,
     required this.createdAt,
     required this.updatedAt,
@@ -30,6 +32,7 @@ class Song {
   final String baseKey;
   final String author;
   final String category;
+  final String genre;
   final String notes;
   final String capo;
   final int? bpm;
@@ -41,6 +44,7 @@ class Song {
   final String? referenceFileExtension;
   final int? referenceFileSizeBytes;
   final DateTime? referenceImportedAt;
+  final DateTime? lastOpenedAt;
   final bool isFavorite;
   final DateTime createdAt;
   final DateTime updatedAt;
@@ -56,6 +60,7 @@ class Song {
     String? baseKey,
     String? author,
     String? category,
+    String? genre,
     String? notes,
     String? capo,
     int? bpm,
@@ -67,6 +72,7 @@ class Song {
     Object? referenceFileExtension = _sentinel,
     Object? referenceFileSizeBytes = _sentinel,
     Object? referenceImportedAt = _sentinel,
+    Object? lastOpenedAt = _sentinel,
     bool? isFavorite,
     DateTime? createdAt,
     DateTime? updatedAt,
@@ -78,6 +84,7 @@ class Song {
       baseKey: baseKey ?? this.baseKey,
       author: author ?? this.author,
       category: category ?? this.category,
+      genre: genre ?? this.genre,
       notes: notes ?? this.notes,
       capo: capo ?? this.capo,
       bpm: bpm ?? this.bpm,
@@ -101,6 +108,9 @@ class Song {
       referenceImportedAt: referenceImportedAt == _sentinel
           ? this.referenceImportedAt
           : referenceImportedAt as DateTime?,
+      lastOpenedAt: lastOpenedAt == _sentinel
+          ? this.lastOpenedAt
+          : lastOpenedAt as DateTime?,
       isFavorite: isFavorite ?? this.isFavorite,
       createdAt: createdAt ?? this.createdAt,
       updatedAt: updatedAt ?? this.updatedAt,
@@ -115,6 +125,7 @@ class Song {
       'base_key': baseKey,
       'author': author,
       'category': category,
+      'genre': genre,
       'notes': notes,
       'capo': capo,
       'bpm': bpm,
@@ -126,6 +137,7 @@ class Song {
       'reference_file_extension': referenceFileExtension,
       'reference_file_size_bytes': referenceFileSizeBytes,
       'reference_imported_at': referenceImportedAt?.toIso8601String(),
+      'last_opened_at': lastOpenedAt?.toIso8601String(),
       'is_favorite': isFavorite ? 1 : 0,
       'created_at': createdAt.toIso8601String(),
       'updated_at': updatedAt.toIso8601String(),
@@ -140,6 +152,7 @@ class Song {
       baseKey: map['base_key'] as String? ?? '',
       author: map['author'] as String? ?? '',
       category: map['category'] as String? ?? '',
+      genre: map['genre'] as String? ?? '',
       notes: map['notes'] as String? ?? '',
       capo: map['capo'] as String? ?? '',
       bpm: map['bpm'] as int?,
@@ -153,6 +166,7 @@ class Song {
       referenceImportedAt: _parseOptionalDate(
         map['reference_imported_at'] as String?,
       ),
+      lastOpenedAt: _parseOptionalDate(map['last_opened_at'] as String?),
       isFavorite: (map['is_favorite'] as int? ?? 0) == 1,
       createdAt: DateTime.parse(map['created_at'] as String),
       updatedAt: DateTime.parse(map['updated_at'] as String),

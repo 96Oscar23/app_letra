@@ -130,6 +130,7 @@ class _SongImportReviewScreenState extends State<SongImportReviewScreen> {
         lyrics: lyrics,
         baseKey: _toneController.text.trim(),
         author: _authorController.text.trim(),
+        genre: widget.initialDraft?.genre ?? '',
         notes: _notesController.text.trim(),
         referenceFilePath: _saveReference ? storedResult.localPath : null,
         referenceFileName: _saveReference ? storedResult.fileName : null,

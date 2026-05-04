@@ -11,7 +11,7 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 
 ---
 
-## Fase 0 - Diseño de producto y experiencia de usuario
+## Fase 0 - Diseño de producto y experiencia de usuario (listo)
 
 **Objetivo:** definir una base visual, una navegación intuitiva y una experiencia amigable antes de construir módulos grandes.
 
@@ -31,7 +31,7 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 
 ---
 
-## Fase 1 - Base de cantos y almacenamiento local
+## Fase 1 - Base de cantos y almacenamiento local (listo)
 
 **Objetivo:** tener una primera versión usable para guardar y consultar cantos sin depender de internet.
 
@@ -49,7 +49,7 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 
 ---
 
-## Fase 2 - Alta rápida, importación y exportación simple
+## Fase 2 - Alta rápida, importación y exportación simple (listo)
 
 **Objetivo:** hacer que capturar nuevos cantos sea fácil, agradable y rápido.
 
@@ -67,7 +67,7 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 
 ---
 
-## Fase 3 - Ingreso de contenido desde archivos e imágenes
+## Fase 3 - Ingreso de contenido desde archivos e imágenes (listo)
 
 **Objetivo:** facilitar la creación de cantos a partir de material existente sin depender de transcripción manual completa.
 
@@ -86,7 +86,7 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 
 ---
 
-## Fase 4 - Búsqueda, filtros y organización básica
+## Fase 4 - Búsqueda, filtros y organización básica (proceso)
 
 **Objetivo:** encontrar y organizar cantos fácilmente cuando la biblioteca crezca.
 
@@ -100,12 +100,13 @@ Pasar de tener las letras en Google Drive a contar con una aplicación propia do
 8. Etiquetas por temporada o evento (Navidad, Semana Santa, etc.)
 9. Favoritos
 10. Cantos recientes
+11. Poder borrar, editar, favitoros, etc, al deslizar cantos izquierda o derecha
 11. Test
-12. Entregable
+12. Entregable apk android
 
 ---
 
-## Fase 5 - Tonos y personalización musical
+## Fase 5 - Tonos y personalización musical (documentando)
 
 **Objetivo:** permitir trabajar tonos de manera práctica para ensayo y presentación.
 

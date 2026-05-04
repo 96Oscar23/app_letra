@@ -224,6 +224,23 @@ class _AppShellState extends State<AppShell> {
     }
   }
 
+  Future<bool?> _openEditSong(BuildContext context, Song song) async {
+    final scope = AppScope.of(context);
+    final changed = await Navigator.of(context).push<bool>(
+      MaterialPageRoute(
+        builder: (_) => SongFormPage(
+          controller: scope.songsController,
+          song: song,
+          mode: SongFormMode.complete,
+        ),
+      ),
+    );
+    if (changed == true) {
+      await scope.songsController.loadSongs();
+    }
+    return changed;
+  }
+
   void _showMessage(BuildContext context, String message) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(content: Text(message)),
@@ -239,10 +256,8 @@ class _AppShellState extends State<AppShell> {
       builder: (context, _) {
         final pages = [
           HomePage(
-            songCount: scope.songsController.songs.length,
-            favoriteCount: scope.songsController.songs
-                .where((song) => song.isFavorite)
-                .length,
+            songCount: scope.songsController.totalSongCount,
+            favoriteCount: scope.songsController.favoriteSongCount,
             onOpenSongs: () => setState(() => _currentIndex = 1),
             onOpenFavorites: () async {
               setState(() => _currentIndex = 1);
@@ -254,18 +269,20 @@ class _AppShellState extends State<AppShell> {
           SongsPage(
             controller: scope.songsController,
             onOpenSong: (song) => _openSongDetail(context, song),
+            onEditSong: (song) => _openEditSong(context, song),
           ),
           const RepertoriesPage(),
           SearchPage(
             controller: scope.songsController,
             onOpenSong: (song) => _openSongDetail(context, song),
+            onEditSong: (song) => _openEditSong(context, song),
           ),
           SettingsPage(controller: scope.settingsController),
         ];
 
         final titles = [
           'Inicio',
-          'Canciones',
+          'Mi biblioteca',
           'Repertorios',
           'Buscar',
           'Configuracion',

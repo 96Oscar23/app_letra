@@ -7,6 +7,7 @@ class SongDraft {
     this.baseKey = '',
     this.author = '',
     this.category = '',
+    this.genre = '',
     this.notes = '',
     this.capo = '',
     this.bpm,
@@ -18,6 +19,7 @@ class SongDraft {
     this.referenceFileExtension,
     this.referenceFileSizeBytes,
     this.referenceImportedAt,
+    this.lastOpenedAt,
   });
 
   final String title;
@@ -25,6 +27,7 @@ class SongDraft {
   final String baseKey;
   final String author;
   final String category;
+  final String genre;
   final String notes;
   final String capo;
   final int? bpm;
@@ -36,6 +39,7 @@ class SongDraft {
   final String? referenceFileExtension;
   final int? referenceFileSizeBytes;
   final DateTime? referenceImportedAt;
+  final DateTime? lastOpenedAt;
 
   factory SongDraft.fromSong(Song song) {
     return SongDraft(
@@ -44,6 +48,7 @@ class SongDraft {
       baseKey: song.baseKey,
       author: song.author,
       category: song.category,
+      genre: song.genre,
       notes: song.notes,
       capo: song.capo,
       bpm: song.bpm,
@@ -55,6 +60,7 @@ class SongDraft {
       referenceFileExtension: song.referenceFileExtension,
       referenceFileSizeBytes: song.referenceFileSizeBytes,
       referenceImportedAt: song.referenceImportedAt,
+      lastOpenedAt: song.lastOpenedAt,
     );
   }
 
@@ -64,6 +70,7 @@ class SongDraft {
     String? baseKey,
     String? author,
     String? category,
+    String? genre,
     String? notes,
     String? capo,
     int? bpm,
@@ -75,6 +82,7 @@ class SongDraft {
     Object? referenceFileExtension = _draftSentinel,
     Object? referenceFileSizeBytes = _draftSentinel,
     Object? referenceImportedAt = _draftSentinel,
+    Object? lastOpenedAt = _draftSentinel,
   }) {
     return SongDraft(
       title: title ?? this.title,
@@ -82,6 +90,7 @@ class SongDraft {
       baseKey: baseKey ?? this.baseKey,
       author: author ?? this.author,
       category: category ?? this.category,
+      genre: genre ?? this.genre,
       notes: notes ?? this.notes,
       capo: capo ?? this.capo,
       bpm: bpm ?? this.bpm,
@@ -105,6 +114,9 @@ class SongDraft {
       referenceImportedAt: referenceImportedAt == _draftSentinel
           ? this.referenceImportedAt
           : referenceImportedAt as DateTime?,
+      lastOpenedAt: lastOpenedAt == _draftSentinel
+          ? this.lastOpenedAt
+          : lastOpenedAt as DateTime?,
     );
   }
 
@@ -115,6 +127,7 @@ class SongDraft {
     required bool isFavorite,
     required DateTime createdAt,
     required DateTime updatedAt,
+    DateTime? lastOpenedAt,
   }) {
     return Song(
       id: id,
@@ -123,6 +136,7 @@ class SongDraft {
       baseKey: baseKey.trim(),
       author: author.trim(),
       category: category.trim(),
+      genre: genre.trim(),
       notes: notes.trim(),
       capo: capo.trim(),
       bpm: bpm,
@@ -134,6 +148,7 @@ class SongDraft {
       referenceFileExtension: referenceFileExtension?.trim(),
       referenceFileSizeBytes: referenceFileSizeBytes,
       referenceImportedAt: referenceImportedAt,
+      lastOpenedAt: lastOpenedAt ?? this.lastOpenedAt,
       isFavorite: isFavorite,
       createdAt: createdAt,
       updatedAt: updatedAt,
