@@ -1,5 +1,5 @@
+import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 import 'song_import_result.dart';
 
@@ -27,33 +27,35 @@ class SongImagePickerService {
   }
 
   Future<SongImportResult?> takePhoto() async {
-    final permission = await Permission.camera.request();
-    if (permission.isPermanentlyDenied) {
-      throw const SongImportException(
-        'El permiso de camara esta deshabilitado. Activalo desde ajustes.',
+    try {
+      final file = await _picker.pickImage(
+        source: ImageSource.camera,
+        preferredCameraDevice: CameraDevice.rear,
+        imageQuality: 92,
       );
-    }
-    if (!permission.isGranted) {
-      throw const SongImportException(
-        'No se concedio permiso para usar la camara.',
+
+      if (file == null) {
+        return null;
+      }
+
+      return _mapFile(
+        file,
+        source: SongImportSource.cameraPhoto,
+        fileTypeLabel: 'Foto',
       );
+    } on PlatformException catch (error) {
+      final code = error.code.toLowerCase();
+      final message = (error.message ?? '').toLowerCase();
+      if (code.contains('camera_access_denied') ||
+          code.contains('permission') ||
+          message.contains('permission') ||
+          message.contains('denied')) {
+        throw const SongImportException(
+          'No se concedio permiso para usar la camara. Si lo rechazaste antes, activalo desde ajustes.',
+        );
+      }
+      rethrow;
     }
-
-    final file = await _picker.pickImage(
-      source: ImageSource.camera,
-      preferredCameraDevice: CameraDevice.rear,
-      imageQuality: 92,
-    );
-
-    if (file == null) {
-      return null;
-    }
-
-    return _mapFile(
-      file,
-      source: SongImportSource.cameraPhoto,
-      fileTypeLabel: 'Foto',
-    );
   }
 
   Future<SongImportResult> _mapFile(
